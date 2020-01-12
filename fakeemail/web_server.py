@@ -62,10 +62,12 @@ class EmailHtmlDisplay(Resource):
                 'address_name': self.name,
                 'content_types': list(available_content_types)}
 
-        # env = Environment(loader=PackageLoader('fakeemail', 'templates'))
-        # template = env.get_template('message_display.html')
 
-        return decoded_email_list[0]['html']
+        env = Environment(loader=PackageLoader('fakeemail', 'templates'))
+        template = env.get_template('data_message_display.html')
+
+        return template.render({"data":decoded_email_list[0]['html']}).encode('UTF-8')
+
 
 
 class WebMessageDisplay(Resource):
