@@ -1,6 +1,6 @@
 import os
 
-from markupsafe import escape
+
 from twisted.web.server import Site
 from twisted.web.resource import Resource
 from twisted.application import internet
