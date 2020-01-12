@@ -1,5 +1,6 @@
 import os
 
+from markupsafe import escape
 from twisted.web.server import Site
 from twisted.web.resource import Resource
 from twisted.application import internet
@@ -66,7 +67,8 @@ class EmailHtmlDisplay(Resource):
         env = Environment(loader=PackageLoader('fakeemail', 'templates'))
         template = env.get_template('data_message_display.html')
 
-        return template.render({"data":decoded_email_list[0]['html']}).encode('UTF-8')
+        s = escape(decoded_email_list[0]['html'])
+        return template.render({"data":s}).encode('UTF-8')
 
 
 
