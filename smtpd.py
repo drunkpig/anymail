@@ -1,6 +1,5 @@
 import asyncio
-import mimetypes
-import tempfile
+import mimetypes,base64
 
 from aiosmtpd.controller import Controller
 import os, time, email
@@ -8,57 +7,62 @@ import os, time, email
 
 class DataHandler(object):
 
+    def get_charset(self, headers):
+        for k,v in headers:
+            if 'content-type' == k.lower():
+                return v[v.rfind("=")+2:-1]
+        return 'utf-8'
+
+    async def __parse_mail(self,msg):
+        counter = 0
+        html_mail_content = ""
+        for part in msg.walk():
+            charset = self.get_charset(part._headers)
+            # multipart/* are just containers
+            content_type = part.get_content_type().lower()
+            payload = part.get_payload(decode=True)
+
+            if 'multipart' in content_type:
+                continue
+            elif 'text/plain' in content_type:
+                c = payload.decode(charset)
+                html_mail_content += c
+            elif 'text/html' in content_type:
+                c = payload.decode(charset)
+                html_mail_content += c
+            else:
+                # Applications should really sanitize the given filename so that an
+                # email message can't be used to overwrite important files
+                filename = part.get_filename()
+                if not filename:
+                    ext = mimetypes.guess_extension(part.get_content_type())
+                    if not ext:
+                        # Use a generic bag-of-bits extension
+                        ext = '.bin'
+                    filename = f'part-{counter}{ext}'
+                counter += 1
+                with open(os.path.join('/temp/mailbox/', filename), 'wb') as fp:
+                    fp.write(part.get_payload(decode=True))
+
+    async def save_mail(self, _from, to, msg):
+        await self.__parse_mail(msg)
+
     async def handle_DATA(self, server, session, envelope):
-        print('Message from %s' % envelope.mail_from)
-        print('Message for %s' % envelope.rcpt_tos[0])
-        print('Message data:\n')
+        _from = envelope.mail_from
+        _to = envelope.rcpt_tos[0]
+        print(f"FROM<{_from}> TO<{_to}>")
         s = envelope.content.decode('utf8', errors='replace')
         msg = email.message_from_string(s)
-        simplest = msg.get_body(preferencelist=('plain', 'html'))
-        print()
-        print(''.join(simplest.get_content().splitlines(keepends=True)[:3]))
-
-        richest = msg.get_body()
-        partfiles = {}
-        mail_content = ""
-        if richest['content-type'].maintype == 'text':
-            if richest['content-type'].subtype == 'plain':
-                for line in richest.get_content().splitlines():
-                    mail_content += line
-            elif richest['content-type'].subtype == 'html':
-                mail_content += richest
-            else:
-                print("Don't know how to display {}".format(richest.get_content_type()))
-        elif richest['content-type'].content_type == 'multipart/related':
-            body = richest.get_body(preferencelist=('html'))
-            for part in richest.iter_attachments():
-                fn = part.get_filename()
-                if fn:
-                    extension = os.path.splitext(part.get_filename())[1]
-                else:
-                    extension = mimetypes.guess_extension(part.get_content_type())
-                with tempfile.NamedTemporaryFile(suffix=extension, delete=False) as f:
-                    f.write(part.get_content())
-                    # again strip the <> to go from email form of cid to html form.
-                    partfiles[part['content-id'][1:-1]] = f.name
-        else:
-            print("Don't know how to display {}".format(richest.get_content_type()))
-        with tempfile.NamedTemporaryFile(mode='w', delete=False) as f:
-            # The magic_html_parser has to rewrite the href="cid:...." attributes to
-            # point to the filenames in partfiles.  It also has to do a safety-sanitize
-            # of the html.  It could be written using html.parser.
-            f.write(magic_html_parser(body.get_content(), partfiles))
-
-
+        await self.save_mail(_from, _to, msg)
 
         return '250 Message accepted for delivery'
 
 
 maildir_path=os.path.expanduser("~/mailbox")
 loop = asyncio.get_event_loop()
-controller = Controller(DataHandler(maildir_path), loop=loop, hostname='0.0.0.0', port=25)
+controller = Controller(DataHandler(), loop=loop, hostname='0.0.0.0', port=25)
 controller.start()
+
 
 while True:
     time.sleep(10)
-
