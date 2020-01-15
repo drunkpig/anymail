@@ -3,7 +3,7 @@ import sqlite3
 from aiosmtpd.controller import Controller
 import os, time
 from datetime import datetime
-
+from web import start_web
 
 class DataHandler(object):
 
@@ -21,7 +21,7 @@ class DataHandler(object):
             insert into {self.table_name} (`email_from`, `email_to`, `dt`, `email_raw`) values
             (?, ?, ?, ?)
         """
-        print(sql)
+        #print(sql)
         cur.execute(sql, (_from, to, tm, raw_mail))
         conn.commit()
         cur.close()
@@ -32,7 +32,7 @@ class DataHandler(object):
         from_ = mail.from_[0][1]
         to_ = mail.to[0][1]
         tm = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"{from_}\t{to_}\t{mail.subject}")
+        print(f"{tm}\t{from_}\t{to_}\t{mail.subject}")
         await self.save_mail(from_, to_, tm, raw_mail)
 
     async def handle_DATA(self, server, session, envelope):
@@ -66,7 +66,6 @@ if __name__=='__main__':
         controller = Controller(DataHandler("~/mailbox", 'fake_mail.db', "fake_mail"), hostname='0.0.0.0', port=25)
         controller.start()
 
-        while True:
-            time.sleep(10)
+        start_web("0.0.0.0", "8888")
     except KeyboardInterrupt:
         print("smtpd quit!")

@@ -1,32 +1,27 @@
-from setuptools import setup
+import setuptools
 
-setup(
-    name='fakeemail',
-    version='0.11.0',
-    author='Tom Wardill',
-    author_email='tom@howrandom.net',
-    description='A fake Email Server with a Web Front End',
-    url='https://github.com/tomwardill/FakeEmail',
-    zip_safe=True,
-    packages=['fakeemail', 'twisted.plugins'],
-    install_requires=[
-        'Twisted',
-        'jinja2',
-        'six',
-        'zope.interface>=3.6.0',
-    ],
-    package_data={
-        'twisted': ['plugins/fakeemail.py'],
-        'fakeemail': ['templates/*']
-        },
+with open("README.md", "r", encoding='utf-8') as fh:
+    long_description = fh.read()
+
+with open("requirements.txt", 'r', encoding='utf-8') as f:
+    dependencies = f.readlines()
+
+setuptools.setup(
+    name="fakemail",
+    version="0.0.1",
+    author="niceMachine",
+    author_email="xuchaoo@gmail.com",
+    description="temp mail|fake email",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/jscrapy/fakemail",
+    packages=setuptools.find_packages(),
     classifiers=[
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 3',
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
     ],
-    entry_points={
-        'console_scripts': [
-            'fakeemail=fakeemail.server:start'
-        ]
-    }
+    install_requires=dependencies,
+
+    python_requires='>=3.6',
 )

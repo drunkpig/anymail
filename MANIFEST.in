@@ -1,1 +1,3 @@
-include fakeemail/templates/*.html
+include templates/*.html
+include requirements.txt
+include README.md
