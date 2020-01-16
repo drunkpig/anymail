@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}:{{ type }}</title>
+    {% include 'css.html' %}
+</head>
+<body>
+
+<table>
+    <tr><td>Title</td><td>{{ title }}</td></tr>
+    <tr><td>FROM</td><td>{{ from }}</td></tr>
+    <tr><td>TO</td><td>{{ to }}</td></tr>
+    <tr><td>DateTime</td><td>{{ dt }}</td></tr>
+</table>
+
+<div class="mail_html_content">
+    {% for h in mail_content %}
+        {% if type=='html' %}
+        {{ h|safe }}
+        {% else %}
+        <pre>
+        {{ h|safe }}
+        </pre>
+        {% endif %}
+    {% endfor %}
+</div>
+
+
+
+
+<div class="mail_attach">
+{% for attach in attaches %}
+    <a href="/attach/"></a>
+{% endfor %}
+</div>
+
+</body>
+</html>

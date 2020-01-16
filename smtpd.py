@@ -5,6 +5,7 @@ import os, time
 from datetime import datetime
 from web import start_web
 
+
 class DataHandler(object):
 
     def __init__(self, mailbox_dir, db_name, table_name):
@@ -14,15 +15,15 @@ class DataHandler(object):
         self.db = f"{self.maildir}/{self.db_name}"
         self.init_db()
 
-    async def save_mail(self, _from, to, tm, raw_mail):
+    async def save_mail(self, _from, to, email_title, tm, raw_mail):
         conn = sqlite3.connect(self.db)
         cur = conn.cursor()
         sql = f"""
-            insert into {self.table_name} (`email_from`, `email_to`, `dt`, `email_raw`) values
-            (?, ?, ?, ?)
+            insert into {self.table_name} (`email_from`, `email_to`, `email_title`,  `dt`, `email_raw`) values
+            (?, ?, ?, ?,?)
         """
         #print(sql)
-        cur.execute(sql, (_from, to, tm, raw_mail))
+        cur.execute(sql, (_from, to, email_title, tm, raw_mail))
         conn.commit()
         cur.close()
         conn.close()
@@ -31,9 +32,10 @@ class DataHandler(object):
         mail = mailparser.parse_from_string(raw_mail)
         from_ = mail.from_[0][1]
         to_ = mail.to[0][1]
+        email_subject = mail.subject
         tm = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"{tm}\t{from_}\t{to_}\t{mail.subject}")
-        await self.save_mail(from_, to_, tm, raw_mail)
+        await self.save_mail(from_, to_, email_subject,  tm, raw_mail)
 
     async def handle_DATA(self, server, session, envelope):
         s = envelope.content.decode('utf8', errors='replace')
@@ -50,6 +52,7 @@ class DataHandler(object):
             id INTEGER  PRIMARY KEY autoincrement,
             email_from   VARCHAR(255),
             email_to  VARCHAR(255),
+            email_title VARCHAR(512),
             dt TEXT,
             email_raw TEXT
             )

@@ -19,7 +19,7 @@
 ### Web UI
 - /   显示全部邮件，按照日期从最近到最久
 - /detail/{id}/{type} 显示这个邮件的详细内容,type:text|html
-- /delete/{email}  删除发送到email地址的邮件
+- /delete/{id}  删除发送到email地址的邮件
 
 
 
