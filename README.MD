@@ -1,4 +1,4 @@
-### fakemail 说明
+### anyemail 说明
 
 你有一个域名或者二级域名，想用email注册很多账号，接收email验证码，那么fakemail可以立刻让你拥有无数email邮箱地址，并收取验证邮件！
 
