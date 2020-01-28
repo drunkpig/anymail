@@ -22,7 +22,7 @@ def index():
     conn = sqlite3.connect(DB)
     cur = conn.cursor()
     sql = f"""
-                select id, email_title, email_from, email_to, dt from {TABLE}  order by dt desc 
+                select id, email_title, email_from, email_to, dt from {TABLE}  order by dt desc limit 100
             """
     cur.execute(sql)
     val = cur.fetchall()
