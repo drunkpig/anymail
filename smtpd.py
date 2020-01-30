@@ -15,15 +15,15 @@ class DataHandler(object):
         self.db = f"{self.maildir}/{self.db_name}"
         self.init_db()
 
-    async def save_mail(self, _from, to, email_title, tm, raw_mail):
+    async def save_mail(self, _from, to, email_title, tm, raw_mail, has_attach):
         conn = sqlite3.connect(self.db)
         cur = conn.cursor()
         sql = f"""
-            insert into {self.table_name} (`email_from`, `email_to`, `email_title`,  `dt`, `email_raw`) values
-            (?, ?, ?, ?,?)
+            insert into {self.table_name} (`email_from`, `email_to`, `email_title`,  `dt`, `email_raw`, `has_attach`) values
+            (?, ?, ?, ?,?, ?)
         """
         #print(sql)
-        cur.execute(sql, (_from, to, email_title, tm, raw_mail))
+        cur.execute(sql, (_from, to, email_title, tm, raw_mail, has_attach))
         conn.commit()
         cur.close()
         conn.close()
@@ -33,9 +33,10 @@ class DataHandler(object):
         from_ = mail.from_[0][1]
         to_ = mail.to[0][1]
         email_subject = mail.subject
+        has_attach = 1 if len(mail.attachments)>0 else 0
         tm = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"{tm}\t{from_}\t{to_}\t{mail.subject}")
-        await self.save_mail(from_, to_, email_subject,  tm, raw_mail)
+        await self.save_mail(from_, to_, email_subject,  tm, raw_mail, has_attach)
 
     async def handle_DATA(self, server, session, envelope):
         s = envelope.content.decode('utf8', errors='replace')
@@ -54,7 +55,8 @@ class DataHandler(object):
             email_to  VARCHAR(255),
             email_title VARCHAR(512),
             dt TEXT,
-            email_raw TEXT
+            email_raw TEXT,
+            has_attach INTEGER not null
             )
         """
         cur.execute(sql)

@@ -10,7 +10,13 @@
 <table class="anymail">
     <tr><td>ID</td><td>DateTime</td><td>FROM</td><td>TO</td><td>Subject</td><td>Action</td></tr>
     {% for m in mails %}
-        <tr><td>{{ m[0] }}</td><td>{{ m[4] }}</td><td>{{ m[2] }}</td><td>{{ m[3] }}</td><td>{{ m[1] }}</td><td><a target="_blank" href="/detail/{{ m[0] }}/html">HTML</a>&nbsp;&nbsp;<a target="_blank" href="/detail/{{ m[0] }}/text">TEXT</a>&nbsp;&nbsp;<a href="/delete/{{ m[0] }}">Delete</a>&nbsp;&nbsp;
+        <tr><td>{{ m[0] }}</td><td>{{ m[4] }}</td><td>{{ m[2] }}</td><td>{{ m[3] }}</td>
+
+            <td  class="attach_{{ m[5] }}">
+                {{ m[1] }}
+            </td>
+
+            <td><a target="_blank" href="/detail/{{ m[0] }}/html">HTML</a>&nbsp;&nbsp;<a target="_blank" href="/detail/{{ m[0] }}/text">TEXT</a>&nbsp;&nbsp;<a href="/delete/{{ m[0] }}">Delete</a>&nbsp;&nbsp;
     <a target="_blank" href="/email/{{ m[3] }}">API</a>
     </td></tr>
     {% endfor %}

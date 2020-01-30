@@ -30,8 +30,9 @@
 
 
 <div class="mail_attach">
-{% for attach in attaches %}
-    <a href="/attach/"></a>
+{% for attach in attachements %}
+    <a href="/attach/{{ mid }}/{{ attach['filename'] }}" target="_blank">{{ attach['filename'] }}</a>
+    <br/>
 {% endfor %}
 </div>
 
